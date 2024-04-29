@@ -1,4 +1,5 @@
 import socket
+import netifaces
 
 def check_server(ip, port):
     try:
@@ -14,27 +15,30 @@ def check_server(ip, port):
         # If any exception occurs (connection refused, timeout, etc.), return False
         return False
 
+def get_local_ips():
+    ips = []
+    for interface in netifaces.interfaces():
+        try:
+            addresses = netifaces.ifaddresses(interface)
+            ip = addresses[netifaces.AF_INET][0]['addr']
+            ips.append(ip)
+        except KeyError:
+            pass
+    return ips
+
 def main():
-    # List of IP addresses to check
-    ips = [
-        "192.168.27.102", "192.168.27.103", "192.168.27.109", "192.168.27.113",
-        "192.168.27.118", "192.168.27.121", "192.168.27.135", "192.168.27.142",
-        "192.168.27.144", "192.168.27.146", "192.168.27.147", "192.168.27.148",
-        "192.168.27.157", "192.168.27.158", "192.168.27.169", "192.168.27.170",
-        "192.168.27.178", "192.168.27.179", "192.168.27.181", "192.168.27.182",
-        "192.168.27.188", "192.168.27.191", "192.168.27.202", "192.168.27.213",
-        "192.168.27.219", "192.168.27.230", "192.168.27.237", "192.168.27.249"
-    ]
+    # Get local IP addresses
+    ips = get_local_ips()
     
     # Port to check
-    port = 80
+    port = 3000
     
-    # Check each IP address
+    # Check each local IP address
     for ip in ips:
         if check_server(ip, port):
             print(f"Server found at {ip}:{port}")
-        #else:
-        #    print(f"")
+        else:
+            print(f"No server found at {ip}:{port}")
 
 if __name__ == "__main__":
     main()
